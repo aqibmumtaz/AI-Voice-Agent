@@ -1,6 +1,11 @@
-from utils import Utils
+from retell_agent import RetellAgent
+from prompt_manager import PromptManager
+from retell_agent import RetellAgent
 
 if __name__ == "__main__":
-    print("Running AI Voice Agent project...")
-    Utils.print_api_key()
-    # Add more logic here as needed
+    agent_api = RetellAgent()
+    try:
+        result = agent_api.create_agent()
+        print("Agent created:", result)
+    except Exception as e:
+        print("Error creating agent:", e)

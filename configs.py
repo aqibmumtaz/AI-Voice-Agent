@@ -9,13 +9,15 @@ class Configs:
     """
 
     RETELL_API_KEY = None
-    # Add more variables here as class attributes, e.g.:
-    # MAX_CALLS = None
-    # THRESHOLD = None
-    # DEBUG_MODE = None
+    LLM_ID = None
+    VOICE_ID = None
+    AGENT_NAME = None
 
     _TYPES = {
         "RETELL_API_KEY": str,
+        "LLM_ID": str,
+        "VOICE_ID": str,
+        "AGENT_NAME": str,
         # "MAX_CALLS": int,
         # "THRESHOLD": float,
         # "DEBUG_MODE": bool,
