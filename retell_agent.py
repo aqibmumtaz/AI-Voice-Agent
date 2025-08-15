@@ -161,11 +161,19 @@ def get_agent():
     agent_name = Configs.RETELL_AGENT_NAME
     # Initialize Agent with default values, but set agent_name from config
     agent = Agent(agent_name=agent_name)
+    retell_agent = None
     try:
         existing = agent_api.get_agent_by_name(agent_name)
         if existing:
             print(f"Agent '{agent_name}' already exists:", existing)
-        else:
+            if Configs.IS_OVERWRITE_RETELL_AGENT:
+                print(
+                    f"IS_OVERWRITE_RETELL_AGENT is True. Deleting existing agent '{agent_name}'..."
+                )
+                agent_api.delete_agent(existing.agent_id)
+                print(f"Deleted agent '{agent_name}'. Creating a new one...")
+                existing = None
+        if not existing:
             llm_id = agent_api.create_llm()
             response_engine = {"llm_id": llm_id, "type": "retell-llm"}
             agent_kwargs = agent.to_dict()
@@ -175,8 +183,14 @@ def get_agent():
                 **agent_kwargs,
             )
             print("Agent created:", result)
+            retell_agent = result
+        else:
+            retell_agent = existing
     except Exception as e:
         print("Error creating or fetching agent:", e)
+        retell_agent = None
+
+    return retell_agent
 
 
 if __name__ == "__main__":

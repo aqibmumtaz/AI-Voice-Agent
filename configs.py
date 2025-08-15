@@ -18,6 +18,7 @@ class Configs:
         "LLM_ID": str,
         "VOICE_ID": str,
         "RETELL_AGENT_NAME": str,
+        "IS_OVERWRITE_RETELL_AGENT": bool,
         # "MAX_CALLS": int,
         # "THRESHOLD": float,
         # "DEBUG_MODE": bool,
@@ -33,7 +34,7 @@ class Configs:
             elif target_type == float:
                 return float(value)
             elif target_type == bool:
-                return value.lower() in ("true", "1", "yes")
+                return str(value).lower() in ("true", "1", "yes")
             else:
                 return value
         except Exception:
