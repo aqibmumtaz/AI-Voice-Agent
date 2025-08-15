@@ -1,7 +1,11 @@
-from configs import Configs
+# Standard library imports
 from datetime import datetime
+
+# Local imports
+from configs import Configs
 from prompt_manager import PromptManager
 from retell import Retell
+from agent_model import Agent
 
 
 class RetellAgent:
@@ -38,7 +42,7 @@ class RetellAgent:
             response_engine=response_engine, voice_id=voice_id, **kwargs
         )
 
-    def list_agents(self, is_published=True):
+    def list_agents(self, is_published=None):
         agents = self.client.agent.list()
         if is_published is not None:
             filtered_agents = []
@@ -60,7 +64,7 @@ class RetellAgent:
     def delete_agent(self, agent_id):
         return self.client.agent.delete(agent_id=agent_id)
 
-    def get_agent_by_name(self, agent_name, is_published=True):
+    def get_agent_by_name(self, agent_name, is_published=None):
         agents = self.list_agents(is_published=is_published)
         for agent in agents:
             try:
@@ -154,7 +158,9 @@ def init_agent():
     tools = prompt_manager.get_tools()
 
     agent_api = RetellAgent()
-    agent_name = Configs.AGENT_NAME
+    agent_name = Configs.RETELL_AGENT_NAME
+    # Initialize Agent with default values, but set agent_name from config
+    agent = Agent(agent_name=agent_name)
     try:
         existing = agent_api.get_agent_by_name(agent_name)
         if existing:
@@ -162,10 +168,11 @@ def init_agent():
         else:
             llm_id = agent_api.create_llm()
             response_engine = {"llm_id": llm_id, "type": "retell-llm"}
-            print(f"Using response_engine: {response_engine}")
-            print(f"Using voice_id: {Configs.VOICE_ID}")
+            agent_kwargs = agent.to_dict()
             result = agent_api.create_agent(
-                response_engine=response_engine, voice_id=Configs.VOICE_ID
+                response_engine=response_engine,
+                voice_id=Configs.VOICE_ID,
+                **agent_kwargs,
             )
             print("Agent created:", result)
     except Exception as e:

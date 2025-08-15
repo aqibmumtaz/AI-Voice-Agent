@@ -11,13 +11,13 @@ class Configs:
     RETELL_API_KEY = None
     LLM_ID = None
     VOICE_ID = None
-    AGENT_NAME = None
+    RETELL_AGENT_NAME = None
 
     _TYPES = {
         "RETELL_API_KEY": str,
         "LLM_ID": str,
         "VOICE_ID": str,
-        "AGENT_NAME": str,
+        "RETELL_AGENT_NAME": str,
         # "MAX_CALLS": int,
         # "THRESHOLD": float,
         # "DEBUG_MODE": bool,
