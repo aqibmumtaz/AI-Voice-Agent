@@ -136,7 +136,7 @@ class RetellAgent:
         return self.client.agent.run(agent_id=agent_id, input=input_text)
 
 
-def init_agent():
+def get_agent():
     company_name = "Alpha"
     agent_name = "Ava"
     customer_name = "John Doe"
@@ -180,4 +180,4 @@ def init_agent():
 
 
 if __name__ == "__main__":
-    init_agent()
+    get_agent()

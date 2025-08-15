@@ -1,4 +1,4 @@
-from retell_agent import init_agent
+from retell_agent import *
 
 if __name__ == "__main__":
-    init_agent()
+    get_agent()
