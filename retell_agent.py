@@ -70,6 +70,63 @@ class RetellAgent:
                 pass
         return None
 
+    # Call methods
+    def create_phone_call(self, from_number, to_number, **kwargs):
+        """Create a new outbound phone call."""
+        return self.client.call.createPhoneCall(
+            from_number=from_number, to_number=to_number, **kwargs
+        )
+
+    def create_web_call(self, agent_id, user_id, **kwargs):
+        """Create a new web call."""
+        return self.client.call.createWebCall(
+            agent_id=agent_id, user_id=user_id, **kwargs
+        )
+
+    # Knowledge Base methods (if supported by SDK)
+    def create_knowledge_base(self, **kwargs):
+        """Create a new knowledge base."""
+        return self.client.knowledge_base.create(**kwargs)
+
+    def get_knowledge_base(self, kb_id):
+        """Get a knowledge base by ID."""
+        return self.client.knowledge_base.get(kb_id=kb_id)
+
+    def update_knowledge_base(self, kb_id, **kwargs):
+        """Update a knowledge base by ID."""
+        return self.client.knowledge_base.update(kb_id=kb_id, **kwargs)
+
+    def delete_knowledge_base(self, kb_id):
+        """Delete a knowledge base by ID."""
+        return self.client.knowledge_base.delete(kb_id=kb_id)
+
+    # Webhook methods (if supported by SDK)
+    def create_webhook(self, **kwargs):
+        """Create a webhook."""
+        return self.client.webhook.create(**kwargs)
+
+    def get_webhook(self, webhook_id):
+        """Get a webhook by ID."""
+        return self.client.webhook.get(webhook_id=webhook_id)
+
+    def update_webhook(self, webhook_id, **kwargs):
+        """Update a webhook by ID."""
+        return self.client.webhook.update(webhook_id=webhook_id, **kwargs)
+
+    def delete_webhook(self, webhook_id):
+        """Delete a webhook by ID."""
+        return self.client.webhook.delete(webhook_id=webhook_id)
+
+    # Agent Version methods
+    def list_agent_versions(self, agent_id):
+        """List all versions of an agent."""
+        return self.client.agent.list_versions(agent_id=agent_id)
+
+    # User DTMF Options (if supported by SDK)
+    def set_user_dtmf_options(self, agent_id, **kwargs):
+        """Set user DTMF options for an agent."""
+        return self.client.agent.set_user_dtmf_options(agent_id=agent_id, **kwargs)
+
     def run_agent(self, agent_id, input_text):
         # The SDK may have a different method for running an agent; adjust as needed
         return self.client.agent.run(agent_id=agent_id, input=input_text)
