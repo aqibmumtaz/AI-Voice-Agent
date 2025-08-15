@@ -46,6 +46,19 @@ class Configs:
             val = os.getenv(key)
             setattr(cls, key, cls._convert_type(val, typ))
 
+    # Utility function to print all config variables for debugging
+    def print_all_configs():
+        print("\n****************** Configs ******************")
+        for attr in dir(Configs):
+            if (
+                not attr.startswith("__")
+                and not callable(getattr(Configs, attr))
+                and attr != "_TYPES"
+            ):
+                print(f"{attr}: {getattr(Configs, attr)}")
+        print("--- End Configs ---")
+
 
 # Ensure configs are loaded on import
 Configs.load_configs()
+Configs.print_all_configs()
