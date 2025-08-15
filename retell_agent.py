@@ -133,7 +133,7 @@ class RetellAgent:
 
 
 def init_agent():
-    company_name = "Bitlojix"
+    company_name = "Alpha"
     agent_name = "Ava"
     customer_name = "John Doe"
     due_date = "2025-09-01"
