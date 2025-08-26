@@ -50,3 +50,4 @@ coverage.xml
 .hypothesis/
 .history
 .env
+output/

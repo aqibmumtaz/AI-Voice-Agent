@@ -26,8 +26,10 @@ def extrapolate_audio(input_path, output_folder, target_duration_sec=10):
 
     # Prepare output path
     os.makedirs(output_folder, exist_ok=True)
-    output_path = os.path.join(output_folder, os.path.basename(input_path))
-    extended_audio.export(output_path, format="wav")
+    base, ext = os.path.splitext(os.path.basename(input_path))
+    output_filename = f"extrapolated_{base}.mp3"
+    output_path = os.path.join(output_folder, output_filename)
+    extended_audio.export(output_path, format="mp3")
 
     print(f"Extrapolated audio saved to: {output_path}")
     return output_path
@@ -196,12 +198,45 @@ def generate_elevenlabs_cloned_voice_from_retellai(params):
 # Example usage:
 if __name__ == "__main__":
     # Example input: only retell_id and audio_path
-    input_json = """
-    {
-        "retell_id": "11labs-Zuri",
-        "audio_path": "input/zuri.mp3"
-    }
-    """
-    params = json.loads(input_json)
-    result = generate_elevenlabs_cloned_voice_from_retellai(params)
-    print(result)
+    input_json_list = [
+        """
+        {
+            "retell_id": "11labs-Andrew",
+            "audio_path": "input/andrew.mp3"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Chloe",
+            "audio_path": "input/chloe.mp3"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Marissa",
+            "audio_path": "input/marissa.mp3"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Paul",
+            "audio_path": "input/paul.mp3"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Steve",
+            "audio_path": "input/steve.mp3"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Zuri",
+            "audio_path": "input/zuri.mp3"
+        }
+        """,
+    ]
+    for input_json in input_json_list:
+        params = json.loads(input_json)
+        result = generate_elevenlabs_cloned_voice_from_retellai(params)
+        print(result)
