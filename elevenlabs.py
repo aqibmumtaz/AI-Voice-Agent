@@ -159,7 +159,7 @@ def generate_elevenlabs_cloned_voice_from_retellai(
         extracted_name = retell_id
 
     if not clone_voice_name:
-        clone_voice_name = f"Retellai-Cloned-{extracted_name}"
+        clone_voice_name = f"Retellai-{retell_id}"
     if not clone_voice_description:
         clone_voice_description = f"Retellai Cloned {extracted_name} voice."
 
