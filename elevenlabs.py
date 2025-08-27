@@ -3,6 +3,7 @@ from pydub import AudioSegment
 import requests
 from configs import Configs
 import json
+from utils import Utils
 
 
 def extrapolate_audio(input_path, output_folder, target_duration_sec=10):
@@ -64,7 +65,7 @@ def create_elevenlabs_voice_clone(api_key, name, audio_path, description=""):
 
 
 def elevenlabs_text_to_speech(
-    api_key, voice_id, text, output_path, model_id="eleven_multilingual_v2"
+    api_key, voice_id, text, output_path, model_id="eleven_turbo_v2"
 ):
     """
     Calls ElevenLabs API to generate TTS audio from text using a voice reference audio.
@@ -73,7 +74,7 @@ def elevenlabs_text_to_speech(
         voice_id (str): The voice ID to use.
         text (str): The text to synthesize.
         output_path (str): Path to save the output audio file.
-        model_id (str): Model to use (default: "eleven_multilingual_v2").
+        model_id (str): Model to use (default: "eleven_turbo_v2").
     Returns:
         str: Path to the saved audio file.
     """
@@ -131,7 +132,9 @@ def get_elevenlabs_voice_id_by_name(api_key, name):
     return None
 
 
-def generate_elevenlabs_cloned_voice_from_retellai(params):
+def generate_elevenlabs_cloned_voice_from_retellai(
+    params, output_dir, tts_model_id="eleven_turbo_v2"
+):
     """
     Given params dict with keys: audio_path, voice_name, description, text
     - Extrapolates audio to 10s
@@ -140,11 +143,14 @@ def generate_elevenlabs_cloned_voice_from_retellai(params):
     Returns dict with paths and voice_id
     """
     api_key = Configs.ELEVENLABS_API_KEY
-    output_dir = "output"
 
-    # Extract retell_id and audio_path
-    retell_id = params["retell_id"]
-    audio_path = params["audio_path"]
+    # Extract all params at the start
+    retell_id = params.get("retell_id")
+    audio_path = params.get("audio_path")
+    language = params.get("language", "english").lower()
+    clone_voice_name = params.get("voice_name")
+    clone_voice_description = params.get("description")
+    tts_text = params.get("tts_text")
 
     # Extract name after dash
     if "-" in retell_id:
@@ -152,37 +158,60 @@ def generate_elevenlabs_cloned_voice_from_retellai(params):
     else:
         extracted_name = retell_id
 
-    voice_name = f"Retellai-Cloned-{extracted_name}"
-    description = f"Retellai Cloned {extracted_name} voice."
+    if not clone_voice_name:
+        clone_voice_name = f"Retellai-Cloned-{extracted_name}"
+    if not clone_voice_description:
+        clone_voice_description = f"Retellai Cloned {extracted_name} voice."
 
     # 1. Extrapolate audio
-    extrapolated_path = extrapolate_audio(
-        audio_path, output_dir, target_duration_sec=10
+    # Get subpath after 'input/' for output folder structure
+    input_prefix = "input/"
+    if audio_path.startswith(input_prefix):
+        subpath = audio_path[len(input_prefix) :]
+    else:
+        subpath = os.path.basename(audio_path)
+    subfolder = os.path.dirname(subpath)
+    subfolder_out = os.path.join(output_dir, subfolder)
+    os.makedirs(subfolder_out, exist_ok=True)
+    base_no_ext = os.path.splitext(os.path.basename(subpath))[0]
+    # Extrapolate audio
+    extrapolated_filename = f"extrapolated_{base_no_ext}.mp3"
+    extrapolated_path = os.path.join(subfolder_out, extrapolated_filename)
+    extended_audio_path = extrapolate_audio(
+        audio_path, subfolder_out, target_duration_sec=10
     )
+    if extended_audio_path != extrapolated_path:
+        os.rename(extended_audio_path, extrapolated_path)
 
     # 2. Check for existing voice by name
-    voice_id = get_elevenlabs_voice_id_by_name(api_key, voice_name)
+    voice_id = get_elevenlabs_voice_id_by_name(api_key, clone_voice_name)
     if voice_id:
-        print(f"Voice '{voice_name}' already exists with ID: {voice_id}")
+        print(f"Voice '{clone_voice_name}' already exists with ID: {voice_id}")
     else:
         # 3. Create new voice clone
         voice_id = create_elevenlabs_voice_clone(
             api_key,
-            voice_name,
+            clone_voice_name,
             extrapolated_path,
-            description,
+            clone_voice_description,
         )
 
     # 4. Transcribe audio to text
     stt_text = elevenlabs_speech_to_text(api_key, audio_path)
-    tts_text = (
-        stt_text.strip()
-        + " My voice is generated using the ElevenLabs model, based on the Retell ai voice. Feel free to ask me anything you need help with."
-    )
+    if not tts_text:
+        if language == "english":
+            tts_suffix = " My voice is generated using the ElevenLabs model, based on the Retell ai voice. Feel free to ask me anything you need help with."
+        else:
+            tts_suffix = " Mi voz se genera utilizando el modelo de ElevenLabs, basado en la voz de Retell AI. No dudes en preguntarme cualquier cosa en la que necesites ayuda."
+        tts_text = stt_text.strip() + tts_suffix
 
     # 5. Generate TTS using the (new or existing) voice
-    tts_output_path = os.path.join(output_dir, f"tts_{voice_name}.mp3")
-    elevenlabs_text_to_speech(api_key, voice_id, tts_text, tts_output_path)
+    tts_output_filename = f"tts_{base_no_ext}_{tts_model_id}.mp3"
+    tts_output_path = os.path.join(subfolder_out, tts_output_filename)
+    print(f"Using TTS model: {tts_model_id}")
+    elevenlabs_text_to_speech(
+        api_key, voice_id, tts_text, tts_output_path, model_id=tts_model_id
+    )
     print(f"TTS audio saved to: {tts_output_path}")
     return {
         "extrapolated_audio_path": extrapolated_path,
@@ -190,8 +219,9 @@ def generate_elevenlabs_cloned_voice_from_retellai(params):
         "tts_output_path": tts_output_path,
         "transcribed_text": stt_text,
         "tts_text": tts_text,
-        "voice_name": voice_name,
-        "description": description,
+        "clone_voice_name": clone_voice_name,
+        "clone_voice_description": clone_voice_description,
+        "tts_model_id": tts_model_id,
     }
 
 
@@ -199,44 +229,98 @@ def generate_elevenlabs_cloned_voice_from_retellai(params):
 if __name__ == "__main__":
     # Example input: only retell_id and audio_path
     input_json_list = [
+        # English voices
         """
         {
             "retell_id": "11labs-Andrew",
-            "audio_path": "input/andrew.mp3"
+            "audio_path": "input/english/andrew.mp3",
+            "language": "english"
         }
         """,
         """
         {
             "retell_id": "11labs-Chloe",
-            "audio_path": "input/chloe.mp3"
+            "audio_path": "input/english/chloe.mp3",
+            "language": "english"
         }
         """,
         """
         {
             "retell_id": "11labs-Marissa",
-            "audio_path": "input/marissa.mp3"
+            "audio_path": "input/english/marissa.mp3",
+            "language": "english"
         }
         """,
         """
         {
             "retell_id": "11labs-Paul",
-            "audio_path": "input/paul.mp3"
+            "audio_path": "input/english/paul.mp3",
+            "language": "english"
         }
         """,
         """
         {
             "retell_id": "11labs-Steve",
-            "audio_path": "input/steve.mp3"
+            "audio_path": "input/english/steve.mp3",
+            "language": "english"
         }
         """,
         """
         {
             "retell_id": "11labs-Zuri",
-            "audio_path": "input/zuri.mp3"
+            "audio_path": "input/english/zuri.mp3",
+            "language": "english"
+        }
+        """,
+        # Spanish voices
+        """
+        {
+            "retell_id": "11labs-Voice1",
+            "audio_path": "input/spanish/voice1.mp3",
+            "language": "spanish"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Voice2",
+            "audio_path": "input/spanish/voice2.mp3",
+            "language": "spanish"
+        }
+        """,
+        """
+        {
+            "retell_id": "11labs-Voice3",
+            "audio_path": "input/spanish/voice3.mp3",
+            "language": "spanish"
         }
         """,
     ]
+
+    # # Add custom tts_text for each input
+    # for i, input_json in enumerate(input_json_list):
+    #     params = json.loads(input_json)
+    #     language = params.get("language", "english").lower()
+    #     if language == "english":
+    #         params["tts_text"] = (
+    #             "Hello, my name is Andrew and I am calling you from BitLogix. I'm reaching out today to assist you with your recent inquiry and ensure you have all the information you need. How can I help you further?"
+    #         )
+    #     else:
+    #         params["tts_text"] = (
+    #             "¡Hola, mi nombre es Andrés y estoy llamando de BitLogix! Me pongo en contacto hoy para ayudarle con su consulta reciente y asegurarme de que tenga toda la información que necesita. ¿Cómo puedo ayudarle más?"
+    #         )
+    #     input_json_list[i] = json.dumps(params)
+
+    # List of TTS models to try
+    tts_models = ["eleven_multilingual_v2", "eleven_turbo_v2"]
+
+    output_dir = "output"
+    Utils.clear_dir(output_dir)
+
     for input_json in input_json_list:
         params = json.loads(input_json)
-        result = generate_elevenlabs_cloned_voice_from_retellai(params)
-        print(result)
+        for tts_model_id in tts_models:
+            print(f"\n--- Running with TTS model: {tts_model_id} ---")
+            result = generate_elevenlabs_cloned_voice_from_retellai(
+                params, output_dir, tts_model_id=tts_model_id
+            )
+            print(result)
