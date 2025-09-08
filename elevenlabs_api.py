@@ -5,7 +5,9 @@ from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import FileResponse, JSONResponse
 import shutil
 import os
-from elevenlabs import generate_elevenlabs_cloned_voice_from_retellai
+from elevenlabs_retell_voice_cloning import (
+    generate_elevenlabs_cloned_voice_from_retellai,
+)
 from utils import Utils
 
 app = FastAPI()
