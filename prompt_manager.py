@@ -1,3 +1,6 @@
+from configs import Configs
+
+
 class PromptManager:
     def __init__(
         self,
@@ -34,101 +37,38 @@ class PromptManager:
         )
 
     def get_tools(self):
+        base_url = Configs.BASE_URL.rstrip("/")
         return [
             {
-                "type": "function",
-                "function": {
-                    "name": "reschedule_call",
-                    "description": "Reschedules a call for a pending invoice. Requires date and time.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "reschedule_call_datetime": {
-                                "type": "string",
-                                "description": "Date and time for rescheduling.",
-                            },
-                            "user_feedback": {
-                                "type": "string",
-                                "description": "User's feedback.",
-                            },
-                            "conversation_summary": {
-                                "type": "string",
-                                "description": "Summary of the conversation.",
-                            },
-                        },
-                    },
-                },
+                "type": "custom",
+                "name": "reschedule_call",
+                "description": "Reschedules a call for a pending invoice. Requires date and time.",
+                "tool_id": "tool_reschedule_call",
+                "url": f"{base_url}/reschedule",
+                "method": "POST",
             },
             {
-                "type": "function",
-                "function": {
-                    "name": "inform_invoice",
-                    "description": "Inform the user about their pending invoice and ask for payment date.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "payment_date": {
-                                "type": "string",
-                                "description": "Date the user will pay.",
-                            },
-                            "user_feedback": {
-                                "type": "string",
-                                "description": "User's feedback.",
-                            },
-                            "conversation_summary": {
-                                "type": "string",
-                                "description": "Summary of the conversation.",
-                            },
-                        },
-                    },
-                },
+                "type": "custom",
+                "name": "inform_invoice",
+                "description": "Inform the user about their pending invoice and ask for payment date.",
+                "tool_id": "tool_inform_invoice",
+                "url": f"{base_url}/inform_invoice",
+                "method": "POST",
             },
             {
-                "type": "function",
-                "function": {
-                    "name": "dispute",
-                    "description": "Handle user disputes about the invoice.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "dispute": {
-                                "type": "string",
-                                "description": "Reason for dispute.",
-                            },
-                            "user_feedback": {
-                                "type": "string",
-                                "description": "User's feedback.",
-                            },
-                            "conversation_summary": {
-                                "type": "string",
-                                "description": "Summary of the conversation.",
-                            },
-                        },
-                    },
-                },
+                "type": "custom",
+                "name": "dispute",
+                "description": "Handle user disputes about the invoice.",
+                "tool_id": "tool_dispute",
+                "url": f"{base_url}/dispute",
+                "method": "POST",
             },
             {
-                "type": "function",
-                "function": {
-                    "name": "invoice_paid",
-                    "description": "Handle user confirmation of invoice payment.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "invoice_paid": {
-                                "type": "string",
-                                "description": "Details of payment confirmation.",
-                            },
-                            "user_feedback": {
-                                "type": "string",
-                                "description": "User's feedback.",
-                            },
-                            "conversation_summary": {
-                                "type": "string",
-                                "description": "Summary of the conversation.",
-                            },
-                        },
-                    },
-                },
+                "type": "custom",
+                "name": "invoice_paid",
+                "description": "Handle user confirmation of invoice payment.",
+                "tool_id": "tool_invoice_paid",
+                "url": f"{base_url}/invoice_paid",
+                "method": "POST",
             },
         ]

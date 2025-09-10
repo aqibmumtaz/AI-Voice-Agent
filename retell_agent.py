@@ -6,9 +6,10 @@ from configs import Configs
 from prompt_manager import PromptManager
 from retell import Retell
 from agent_model import Agent
+from conversation_flow_model import ConversationFlow
 
 
-class RetellAgent:
+class RetellAgentManager:
     def __init__(self):
         self.client = Retell(api_key=Configs.RETELL_API_KEY)
 
@@ -135,6 +136,8 @@ class RetellAgent:
         # The SDK may have a different method for running an agent; adjust as needed
         return self.client.agent.run(agent_id=agent_id, input=input_text)
 
+    # Conversation Flow helpers
+
 
 def get_agent():
     company_name = "Alpha"
@@ -155,42 +158,49 @@ def get_agent():
         current_date_time,
     )
     prompt = prompt_manager.get_prompt()
-    tools = prompt_manager.get_tools()
+    tools = None  # prompt_manager.get_tools()
 
-    agent_api = RetellAgent()
+    retell_agent_manager = RetellAgentManager()
     agent_name = Configs.RETELL_AGENT_NAME
     # Initialize Agent with default values, but set agent_name from config
-    agent = Agent(agent_name=agent_name)
-    retell_agent = None
+    agent = Agent(agent_name=agent_name, tools=tools)
+
+    created_agent = None
     try:
-        existing = agent_api.get_agent_by_name(agent_name)
+        existing = retell_agent_manager.get_agent_by_name(agent_name)
         if existing:
-            print(f"Agent '{agent_name}' already exists:", existing)
             if Configs.IS_OVERWRITE_RETELL_AGENT:
                 print(
                     f"IS_OVERWRITE_RETELL_AGENT is True. Deleting existing agent '{agent_name}'..."
                 )
-                agent_api.delete_agent(existing.agent_id)
+                retell_agent_manager.delete_agent(existing.agent_id)
                 print(f"Deleted agent '{agent_name}'. Creating a new one...")
                 existing = None
         if not existing:
-            llm_id = agent_api.create_llm()
+            # 1. Create conversation flow (sets prompt/model)
+            conv_flow = ConversationFlow.single_prompt_flow(prompt, tools=tools)
+            conv_flow_resp = retell_agent_manager.client.conversation_flow.create(
+                **conv_flow.to_dict()
+            )
+            # 2. Create LLM (Retell will associate it with the latest flow)
+            llm_id = retell_agent_manager.create_llm()
+            # 3. Create agent with response_engine using only llm_id
             response_engine = {"llm_id": llm_id, "type": "retell-llm"}
             agent_kwargs = agent.to_dict()
-            result = agent_api.create_agent(
+            result = retell_agent_manager.create_agent(
                 response_engine=response_engine,
                 voice_id=Configs.VOICE_ID,
                 **agent_kwargs,
             )
             print("Agent created:", result)
-            retell_agent = result
+            created_agent = result
         else:
-            retell_agent = existing
+            created_agent = existing
     except Exception as e:
         print("Error creating or fetching agent:", e)
-        retell_agent = None
+        created_agent = None
 
-    return retell_agent
+    return created_agent
 
 
 if __name__ == "__main__":

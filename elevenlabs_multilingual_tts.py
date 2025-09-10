@@ -77,13 +77,16 @@ def generate_multilingual_tts_for_voices(
         voice_id = voice["voice_id"]
         language = voice["language"]
         input_text = voice["input_text"]
+        gender = voice["gender"]
         print(
             f"\nVoice: {language} https://elevenlabs.io/app/voice-library?voiceId={voice_id}"
         )
         print(f'Input text: "{input_text}"')
         success = False
         for model_id in tts_models:
-            output_path = os.path.join(output_dir, f"tts_{language}_{model_id}.mp3")
+            output_path = os.path.join(
+                output_dir, f"tts_{language}_{gender}_{voice_id}_{model_id}.mp3"
+            )
             try:
                 elevenlabs_text_to_speech(
                     api_key, voice_id, input_text, output_path, model_id=model_id
@@ -101,111 +104,190 @@ def generate_multilingual_tts_for_voices(
 if __name__ == "__main__":
 
     # Example usage
+    # voice_list = [
+    # {
+    #     "voice_id": "ZIlrSGI4jZqobxRKprJz",
+    #     "language": "English",
+    #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
+    # },
+    # {
+    #     "voice_id": "uYFJyGaibp4N2VwYQshk",
+    #     "language": "Czech",
+    #     "input_text": "Ahoj, jsem váš virtuální asistent, jsem tu, abych vám kdykoli pomohl.",
+    # },
+    # {
+    #     "voice_id": "ygiXC2Oa1BiHksD3WkJZ",
+    #     "language": "Danish",
+    #     "input_text": "Hej, jeg er din virtuelle assistent, klar til at hjælpe dig når som helst.",
+    # },
+    # {
+    #     "voice_id": "jfwdd64Nlhnj6vcFqRHZ",
+    #     "language": "Dutch",
+    #     "input_text": "Hallo, ik ben uw virtuele assistent en ik help u graag verder.",
+    # },
+    # {
+    #     "voice_id": "YxrwjAKoUKULGd0g8K9Y",
+    #     "language": "French",
+    #     "input_text": "Bonjour, je suis votre assistant virtuel, toujours prêt à vous aider.",
+    # },
+    # {
+    #     "voice_id": "aTTiK3YzK3dXETpuDE2h",
+    #     "language": "German",
+    #     "input_text": "Hallo, ich bin Ihr virtueller Assistent und helfe Ihnen graag.",
+    # },
+    # {
+    #     "voice_id": "20zUtLxCwVzsFDWub4sB",
+    #     "language": "Greek",
+    #     "input_text": "Γεια σας, είμαι ο εικονικός σας βοηθός, εδώ για να σας βοηθήσω οποιαδήποτε στιγμή.",
+    # },
+    # {
+    #     "voice_id": "1Z7Y8o9cvUeWq8oLKgMY",
+    #     "language": "Hindi",
+    #     "input_text": "नमस्ते, मैं आपका वर्चुअल असिस्टेंट हूँ, आपकी मदद के लिए हमेशा तैयार।",
+    # },
+    # {
+    #     "voice_id": "v70fYBHUOrHA3AKIBjPq",
+    #     "language": "Indonesian",
+    #     "input_text": "Halo, saya asisten virtual Anda, siap membantu Anda kapan saja.",
+    # },
+    # {
+    #     "voice_id": "HuK8QKF35exsCh2e7fLT",
+    #     "language": "Italian",
+    #     "input_text": "Ciao, sono il tuo assistente virtuale, pronto ad aiutarti sempre.",
+    # },
+    # {
+    #     "voice_id": "3JDquces8E8bkmvbh6Bc",
+    #     "language": "Japanese",
+    #     "input_text": "こんにちは、私はあなたのバーチャルアシスタントです。いつでもお手伝いします。",
+    # },
+    # {
+    #     "voice_id": "4JJwo477JUAx3HV0T7n7",
+    #     "language": "Korean",
+    #     "input_text": "안녕하세요, 저는 언제든지 도와드릴 수 있는 가상 비서입니다.",
+    # },
+    # {
+    #     "voice_id": "dgrgQcxISbZtq517iweJ",
+    #     "language": "Norwegian",
+    #     "input_text": "Hei, jeg er din virtuelle assistent, her for å hjelpe deg når som helst.",
+    # },
+    # {
+    #     "voice_id": "EmspiS7CSUabPeqBcrAP",
+    #     "language": "Polish",
+    #     "input_text": "Cześć, jestem twoim wirtualnym asystentem, gotowym do pomocy w każdej chwili.",
+    # },
+    # {
+    #     "voice_id": "tS45q0QcrDHqHoaWdCDR",
+    #     "language": "Portuguese",
+    #     "input_text": "Olá, sou o seu assistente virtual, aqui para ajudar sempre que precisar.",
+    # },
+    # {
+    #     "voice_id": "AB9XsbSA4eLG12t2myjN",
+    #     "language": "Russian",
+    #     "input_text": "Здравствуйте, я ваш виртуальный помощник, всегда готов помочь вам.",
+    # },
+    # {
+    #     "voice_id": "2Lb1en5ujrODDIqmp7F3",
+    #     "language": "Spanish",
+    #     "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
+    # },
+    # {
+    #     "voice_id": "x0u3EW21dbrORJzOq1m9",
+    #     "language": "Swedish",
+    #     "input_text": "Hej, jag är din virtuella assistent, här för att hjälpa dig när som helst.",
+    # },
+    # {
+    #     "voice_id": "D1xRw7f8ZHedI7xJgfvz",
+    #     "language": "Turkish",
+    #     "input_text": "Merhaba, ben sanal asistanınızım ve size her zaman yardımcı olmaya hazırım.",
+    # },
+    # {
+    #     "voice_id": "bg0e02brzo3RVUEbuZeo",
+    #     "language": "Ukrainian",
+    #     "input_text": "Привіт, я ваш віртуальний помічник, завжди готовий допомогти вам у будь-який час.",
+    # },
+    # ]
+
     voice_list = [
+        # # English - Male
         # {
-        #     "voice_id": "ZIlrSGI4jZqobxRKprJz",
+        #     "voice_id": "UgBBYS2sOqTuMpoF3BR0",
         #     "language": "English",
+        #     "gender": "Male",
         #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
         # },
         # {
-        #     "voice_id": "uYFJyGaibp4N2VwYQshk",
-        #     "language": "Czech",
-        #     "input_text": "Ahoj, jsem váš virtuální asistent, jsem tu, abych vám kdykoli pomohl.",
+        #     "voice_id": "vBKc2FfBKJfcZNyEt1n6",
+        #     "language": "English",
+        #     "gender": "Male",
+        #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
         # },
         # {
-        #     "voice_id": "ygiXC2Oa1BiHksD3WkJZ",
-        #     "language": "Danish",
-        #     "input_text": "Hej, jeg er din virtuelle assistent, klar til at hjælpe dig når som helst.",
+        #     "voice_id": "t9pa8vZ7tCoTLCLirl6c",
+        #     "language": "English",
+        #     "gender": "Male",
+        #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
+        # },
+        # # English - Female
+        # {
+        #     "voice_id": "TbMNBJ27fH2U0VgpSNko",
+        #     "language": "English",
+        #     "gender": "Female",
+        #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
         # },
         # {
-        #     "voice_id": "jfwdd64Nlhnj6vcFqRHZ",
-        #     "language": "Dutch",
-        #     "input_text": "Hallo, ik ben uw virtuele assistent en ik help u graag verder.",
+        #     "voice_id": "OYTbf65OHHFELVut7v2H",
+        #     "language": "English",
+        #     "gender": "Female",
+        #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
         # },
         # {
-        #     "voice_id": "YxrwjAKoUKULGd0g8K9Y",
-        #     "language": "French",
-        #     "input_text": "Bonjour, je suis votre assistant virtuel, toujours prêt à vous aider.",
+        #     "voice_id": "NHRgOEwqx5WZNClv5sat",
+        #     "language": "English",
+        #     "gender": "Female",
+        #     "input_text": "Hello, I’m your virtual assistant, here to help you anytime.",
         # },
+        # # Spanish - Male
         # {
-        #     "voice_id": "aTTiK3YzK3dXETpuDE2h",
-        #     "language": "German",
-        #     "input_text": "Hallo, ich bin Ihr virtueller Assistent und helfe Ihnen graag.",
-        # },
-        # {
-        #     "voice_id": "20zUtLxCwVzsFDWub4sB",
-        #     "language": "Greek",
-        #     "input_text": "Γεια σας, είμαι ο εικονικός σας βοηθός, εδώ για να σας βοηθήσω οποιαδήποτε στιγμή.",
-        # },
-        # {
-        #     "voice_id": "1Z7Y8o9cvUeWq8oLKgMY",
-        #     "language": "Hindi",
-        #     "input_text": "नमस्ते, मैं आपका वर्चुअल असिस्टेंट हूँ, आपकी मदद के लिए हमेशा तैयार।",
-        # },
-        # {
-        #     "voice_id": "v70fYBHUOrHA3AKIBjPq",
-        #     "language": "Indonesian",
-        #     "input_text": "Halo, saya asisten virtual Anda, siap membantu Anda kapan saja.",
-        # },
-        # {
-        #     "voice_id": "HuK8QKF35exsCh2e7fLT",
-        #     "language": "Italian",
-        #     "input_text": "Ciao, sono il tuo assistente virtuale, pronto ad aiutarti sempre.",
-        # },
-        # {
-        #     "voice_id": "3JDquces8E8bkmvbh6Bc",
-        #     "language": "Japanese",
-        #     "input_text": "こんにちは、私はあなたのバーチャルアシスタントです。いつでもお手伝いします。",
-        # },
-        # {
-        #     "voice_id": "4JJwo477JUAx3HV0T7n7",
-        #     "language": "Korean",
-        #     "input_text": "안녕하세요, 저는 언제든지 도와드릴 수 있는 가상 비서입니다.",
-        # },
-        # {
-        #     "voice_id": "dgrgQcxISbZtq517iweJ",
-        #     "language": "Norwegian",
-        #     "input_text": "Hei, jeg er din virtuelle assistent, her for å hjelpe deg når som helst.",
-        # },
-        # {
-        #     "voice_id": "EmspiS7CSUabPeqBcrAP",
-        #     "language": "Polish",
-        #     "input_text": "Cześć, jestem twoim wirtualnym asystentem, gotowym do pomocy w każdej chwili.",
-        # },
-        # {
-        #     "voice_id": "tS45q0QcrDHqHoaWdCDR",
-        #     "language": "Portuguese",
-        #     "input_text": "Olá, sou o seu assistente virtual, aqui para ajudar sempre que precisar.",
-        # },
-        # {
-        #     "voice_id": "AB9XsbSA4eLG12t2myjN",
-        #     "language": "Russian",
-        #     "input_text": "Здравствуйте, я ваш виртуальный помощник, всегда готов помочь вам.",
-        # },
-        # {
-        #     "voice_id": "2Lb1en5ujrODDIqmp7F3",
+        #     "voice_id": "YExhVa4bZONzeingloMX",
         #     "language": "Spanish",
+        #     "gender": "Male",
         #     "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
         # },
         # {
-        #     "voice_id": "x0u3EW21dbrORJzOq1m9",
-        #     "language": "Swedish",
-        #     "input_text": "Hej, jag är din virtuella assistent, här för att hjälpa dig när som helst.",
+        #     "voice_id": "94zOad0g7T7K4oa7zhDq",
+        #     "language": "Spanish",
+        #     "gender": "Male",
+        #     "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
+        # },
+        {
+            "voice_id": "7QQzpAyzlKTVrRzQJmTE",
+            "language": "Spanish",
+            "gender": "Male",
+            "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
+        },
+        # # Spanish - Female
+        # {
+        #     "voice_id": "gD1IexrzCvsXPHUuT0s3",
+        #     "language": "Spanish",
+        #     "gender": "Female",
+        #     "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
         # },
         # {
-        #     "voice_id": "D1xRw7f8ZHedI7xJgfvz",
-        #     "language": "Turkish",
-        #     "input_text": "Merhaba, ben sanal asistanınızım ve size her zaman yardımcı olmaya hazırım.",
+        #     "voice_id": "3Fx71T889APcHRu4VtQf",
+        #     "language": "Spanish",
+        #     "gender": "Female",
+        #     "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
         # },
         # {
-        #     "voice_id": "bg0e02brzo3RVUEbuZeo",
-        #     "language": "Ukrainian",
-        #     "input_text": "Привіт, я ваш віртуальний помічник, завжди готовий допомогти вам у будь-який час.",
+        #     "voice_id": "86V9x9hrQds83qf7zaGn",
+        #     "language": "Spanish",
+        #     "gender": "Female",
+        #     "input_text": "Hola, soy tu asistente virtual, aquí para ayudarte en todo momento.",
         # },
     ]
 
     output_dir = "output"
-    # Utils.clear_dir(output_dir)
+    Utils.clear_dir(output_dir)
 
     # List of available ElevenLabs TTS models (as of 2024-06)
     tts_models = [

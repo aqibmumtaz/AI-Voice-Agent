@@ -12,6 +12,11 @@ class Configs:
     LLM_ID = None
     VOICE_ID = None
     RETELL_AGENT_NAME = None
+    IS_OVERWRITE_RETELL_AGENT = None
+    BASE_URL = None
+    ELEVENLABS_API_KEY = None
+    ELEVENLABS_VOICE_ID = None
+    CALL_API_KEY = None
 
     _TYPES = {
         "RETELL_API_KEY": str,
@@ -19,6 +24,10 @@ class Configs:
         "VOICE_ID": str,
         "RETELL_AGENT_NAME": str,
         "IS_OVERWRITE_RETELL_AGENT": bool,
+        "BASE_URL": str,
+        "ELEVENLABS_API_KEY": str,
+        "ELEVENLABS_VOICE_ID": str,
+        "CALL_API_KEY": str,
         # "MAX_CALLS": int,
         # "THRESHOLD": float,
         # "DEBUG_MODE": bool,
